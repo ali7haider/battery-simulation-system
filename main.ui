@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>528</width>
-    <height>476</height>
+    <width>594</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -976,6 +976,12 @@ font: 11pt &quot;Roboto&quot;;
                           </item>
                           <item row="0" column="0">
                            <widget class="QFrame" name="frame_3">
+                            <property name="minimumSize">
+                             <size>
+                              <width>330</width>
+                              <height>0</height>
+                             </size>
+                            </property>
                             <property name="frameShape">
                              <enum>QFrame::StyledPanel</enum>
                             </property>

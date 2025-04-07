@@ -46,6 +46,7 @@ class MasterScreen(QtWidgets.QMainWindow):
             # Other initializations...
             self.elapsed_time = 0  # Store the time when simulation is paused
             self.is_paused = False  # Track if the simulation is paused
+            self.elapsed_seconds = 0  # Track elapsed time in seconds
 
                         
             self.powerSlider.setMinimum(-5000)  # Example: -5000W (charging)
@@ -115,20 +116,13 @@ class MasterScreen(QtWidgets.QMainWindow):
         else:
             # Stop the CSV timer when all values have been processed
             self.csv_timer.stop()
+            self.powerSlider.setEnabled(True)
 
 
 
     def on_slider_released(self):
         """Handle the slider release event and update values accordingly."""
         try:
-            # Pause simulation for 5 seconds
-            self.timer.stop()
-            self.csv_timer.stop()
-
-            # Store the current elapsed time before pausing
-            self.is_paused = True
-            QTimer.singleShot(5000, self.resume_simulation)
-
             # Get the current value of the slider (power)
             power_value = self.powerSlider.value()
 
@@ -149,12 +143,16 @@ class MasterScreen(QtWidgets.QMainWindow):
     def resume_simulation(self):
         """Resume the simulation after 5 seconds."""
         try:
-            if self.is_paused:
-                # Resume from where it was paused
-                self.timer.start(1000)  # Restart the timer
-                self.csv_timer.start(1000)  # Resume CSV simulation
-                self.is_paused = False
-                print("Simulation resumed after 5 seconds.")
+            if not hasattr(self, "csv_power_values") or not self.csv_power_values:
+                print("No CSV file loaded. Simulation cannot resume.")
+                return
+            # Resume from where it was paused
+            self.sliderValueLabel.setText("0 W")  # Reset slider label
+            self.powerSlider.setValue(0)  # Reset slider to 0
+            self.timer.start(1000)  # Restart the timer
+            self.csv_timer.start(1000)  # Resume CSV simulation
+            self.is_paused = False
+            print("Simulation resumed after 5 seconds.")
         except Exception as e:
             self.handle_error("Simulation Resume Error", e)
 
@@ -178,6 +176,7 @@ class MasterScreen(QtWidgets.QMainWindow):
             self.sliderValueLabel.setText("0 W")  # Reset slider label
             self.powerSlider.setValue(0)  # Reset slider to 0
             self.elapsed_seconds = 0  # Reset elapsed time tracking
+            self.powerSlider.setDisabled(True)
             self.timer.start(1000)  # Update every second
             self.csv_timer.start(1000)  # Update power from CSV every second
             self.is_paused = False  # Ensure it's not paused when starting
@@ -191,6 +190,7 @@ class MasterScreen(QtWidgets.QMainWindow):
             self.timer.stop()
             self.csv_timer.stop()
             print("Simulation stopped.")
+            self.powerSlider.setEnabled(True)
             self.elapsed_seconds = 0  # Reset elapsed time
             self.timeLabel.setText(f"Zeit seit Start: 00:00:00")
         except Exception as e:
